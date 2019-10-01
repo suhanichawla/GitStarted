@@ -1,0 +1,16 @@
+.size{
+    height:15vh;
+    width:15vh;
+    background-color: aqua;
+    border: 1px solid black;
+}
+#board{
+    height:50vh;
+    width:50vh;
+    background-color: black;
+    align-content: center;
+}
+.set_of_three{
+    width:100%;
+    display: flex;
+}
