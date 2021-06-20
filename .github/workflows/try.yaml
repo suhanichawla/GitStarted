@@ -1,6 +1,6 @@
 name: 'Issue Tasks Completed Check'
 on: 
-  issue:
+  issues:
     types: [opened, edited]
 
 jobs:
