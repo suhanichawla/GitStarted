@@ -1,7 +1,7 @@
 name: 'Issue Tasks Completed Check'
 on: 
   issues:
-    types: [opened, transferred, reopened]
+    types: [opened, transferred, reopened, edited]
   issue_comment:
 
 jobs:
