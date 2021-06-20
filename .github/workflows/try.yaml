@@ -1,12 +1,15 @@
 name: 'Issue Tasks Completed Check'
 on: 
   issues:
-    types: [opened, edited]
+    types: [opened, transferred, reopened]
+  issue_comment:
 
 jobs:
-  task-check:
+  respond:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: kentaro-m/task-completed-checker-action@v0.1.0
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+    - uses: ben-z/actions-comment-on-issue@1.0.2alpha1
+      with:
+        message: "I posted a comment yay"
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
