@@ -48,7 +48,8 @@ The issue creation process involves the following steps
   1.2. Find a template issue on `marketplace` repository. Clone the issue and update its contents to add current listing information \
   1.3. Add correct label on the issue. If the listing is requesting publish from draft state add the `financial-onboarding-draft` label. If the listing is initiating financial onboarding from unverified state, add the `financial-onboarding-unverified` label \
   1.4. Save and create the issue 
-If the process fails at any point, we log an error in splunk 
+If the process fails at any point, we log an error in splunk.
+Note: The issue is created using a new bot account `MarketplaceBot` whose credentials are saved in the Github 1Password vault
 
 **2. Financial Onboarding Job**
 
