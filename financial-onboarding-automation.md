@@ -14,15 +14,25 @@ Present workflow \
 
 ## Intent
 - Automating the issue creation when user requests to publish with a paid plan or initiates financial onboarding
-- Sending an email to the user with a google form to collect some basic information required for the payment enrollment
-- Automating issue conversation to save manual effort. More details on its implementation [here](https://docs.google.com/document/d/17H7cC11hBRxagedyR5eAVLRSz-tVa6_DYa-7tsRvskg/edit?usp=sharing)
+- Performing webhook checks directly from github.com and automatically sending email with financial onboarding form
+- Updating issue with status of webhook checks and form sending procedure
+
+## Approach
+A new module `FinancialOnboardingDependency` has been created to provide helper functions for facilitating issue creation and sending email using MarketplaceMailer.
+In order to automate the process of financial onboarding, we will listen to `request_verified_approval` on draft and unverified listings. 
+Here we will consider two cases:
+- When a transition takes place from from `draft` state to `verification_pending_from_draft` state for draft listing
+- When a transition takes place from from `unverified` state to `:verification_pending_from_unverified` state for unverified listing
+In both these cases, we will call `initiate_financial_onboarding` declared in `FinancialOnboardingDependency` module. This will create an issue in the marketplace repository as well an enqueue a new background job `FinancialOnboardingJob` which will perform webhook check on the listing, send email to user if check is successful and update issue with the current status of the listing.
+Here is the updated workflow after the automation
 
 Updated workflow \
-![FlowWithBot (1)](https://user-images.githubusercontent.com/44273715/123704647-821a2900-d883-11eb-831b-a84da6822152.png)
+![FlowWithAutomation](https://user-images.githubusercontent.com/44273715/124869144-6e3a9980-dfde-11eb-82b6-bf7179d05a86.png)
+
 
 ## Implementation specifics
 
-A new module `FinancialOnboardingHelper` has been created to provide helper functions for facilitating issue creation and sending email using MarketplaceMailer.
+A new module `FinancialOnboardingDependency` has been created to provide helper functions for facilitating issue creation and sending email using MarketplaceMailer.
 
 1. For draft apps applying to publish with paid plan
 
