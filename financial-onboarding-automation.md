@@ -48,14 +48,31 @@ The issue creation process involves the following steps
 If the process fails at any point, we log an error in splunk 
 
 2. Financial Onboarding Job
+
+Associated inputs: 
+hook, issue_id, listing_type, mailer_params
+
+![Financial Onboarding Job (1)](https://user-images.githubusercontent.com/44273715/124971857-53503f80-e047-11eb-878a-7a82a0f1a3a4.png)
+
 The financial onboarding job is responsible for 
 a. Performing webhook checks on the listing
 b. Sending email to user if check is successful 
 c. Updating status of listing on the created issue
 
-![Financial Onboarding Job (1)](https://user-images.githubusercontent.com/44273715/124971857-53503f80-e047-11eb-878a-7a82a0f1a3a4.png)
-
 * The `send_email_for_financial_onboarding` method uses the `MarketplaceMailer` method `financial_onboarding_update` to send an email with a google form for collecting basic information for onboarding onto payment portal. The email is sent to technical lead and financial lead emails specified by the user in their the app listing
+
+## Testing in dev environment
+To test the changes in dev environment following setup is required:
+1. Log into the dev environment with `monalisa` test account
+2. Create a private repository by the name of `marketplace` under `github` organization
+3. Create two template issues on this repository, one containing template for draft listing applying for financial onboarding (sample) and another for unverified listing applying for financial onboarding (sample) and note their issue numbers
+4. Go to `financial-onboarding-dependency.rb` file in `app/models/marketplace` and replace the issue numbers by your newly created issue numbers for draft and unverified listing respectively
+5. Now that the setup is done, create a new organization, create a new github app, list the app in marketplace and request publish with this app with a paid plan 
+The marketplace repository should be updated with a newly created issue with your app listing details
+
+## Future Enhancements
+1. Slack notification on `marketplace-engg` or similar marketplace support channel if issue creation fails
+2. The process of marking various checks as completed in the tasklist of issue description is based on position of the task, more specifically on its relative ordering the in the checklist in issue body. We can figure out am approach to make the tasklist implementation independent of the position of the check, thus allowing us to modify the issue template freely
 
 ## Related Links
 - Associated issue: https://github.com/github/marketplace/issues/2135
