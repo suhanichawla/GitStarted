@@ -31,7 +31,6 @@ Here we will consider two cases:
 In both these cases, we will call `initiate_financial_onboarding` declared in `FinancialOnboardingDependency` module. This will create an issue in the marketplace repository as well an enqueue a new background job `FinancialOnboardingJob` which will perform webhook check on the listing, send email to user if check is successful and update issue with the current status of the listing.
 Here is the updated workflow after the automation
 
-Updated workflow after automation\
 ![FlowWithAutomation](https://user-images.githubusercontent.com/44273715/124869144-6e3a9980-dfde-11eb-82b6-bf7179d05a86.png)
 
 
@@ -43,7 +42,7 @@ Let's talk about the two main processes in detail:
 
 ![issuecreation](https://user-images.githubusercontent.com/44273715/124970834-0cae1580-e046-11eb-8fa9-6e282c09cc37.png)
 
-The issue creation process involves the following steps
+The issue creation process involves the following steps <br>
   1.1. Find `github/marketplace` repository on github \
   1.2. Find a template issue on `marketplace` repository. Clone the issue and update its contents to add current listing information \
   1.3. Add correct label on the issue. If the listing is requesting publish from draft state add the `financial-onboarding-draft` label. If the listing is initiating financial onboarding from unverified state, add the `financial-onboarding-unverified` label \
