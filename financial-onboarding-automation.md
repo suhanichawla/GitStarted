@@ -20,46 +20,52 @@ Present workflow \
 ## Approach
 The automation process has two sequencial steps
 1. Creation of issue on marketplace repository
-2. Running a background job (Financial Onboarding Job) to perform webhook checks and updating listing status on the issue
+2. Running a background job (Financial Onboarding Job) to perform webhook checks and updating listing status on the issue \
+
 A new module `FinancialOnboardingDependency` has been created to provide helper functions for facilitating issue creation and running Financial Onboarding Job.
 We will listen to `request_verified_approval` on draft and unverified listings. 
 Here we will consider two cases:
 - When a transition takes place from from `draft` state to `verification_pending_from_draft` state for draft listing
-- When a transition takes place from from `unverified` state to `:verification_pending_from_unverified` state for unverified listing \
+- When a transition takes place from from `unverified` state to `:verification_pending_from_unverified` state for unverified listing 
+<br>
 In both these cases, we will call `initiate_financial_onboarding` declared in `FinancialOnboardingDependency` module. This will create an issue in the marketplace repository as well an enqueue a new background job `FinancialOnboardingJob` which will perform webhook check on the listing, send email to user if check is successful and update issue with the current status of the listing.
 Here is the updated workflow after the automation
 
-Updated workflow \
+Updated workflow after automation\
 ![FlowWithAutomation](https://user-images.githubusercontent.com/44273715/124869144-6e3a9980-dfde-11eb-82b6-bf7179d05a86.png)
 
 
 ## Implementation specifics
 
 Let's talk about the two main processes in detail:
-1. Issue creation
+
+**1. Issue creation**
+
 ![issuecreation](https://user-images.githubusercontent.com/44273715/124970834-0cae1580-e046-11eb-8fa9-6e282c09cc37.png)
 
 The issue creation process involves the following steps
-1. Find `github/marketplace` repository on github
-2. Find a template issue on `marketplace` repository. Clone the issue and update its contents to add current listing information
-3. Add correct label on the issue. If the listing is requesting publish from draft state add the `financial-onboarding-draft` label. If the listing is initiating financial onboarding from unverified state, add the `financial-onboarding-unverified` label
-4. Save and create the issue
-
+  1.1. Find `github/marketplace` repository on github \
+  1.2. Find a template issue on `marketplace` repository. Clone the issue and update its contents to add current listing information \
+  1.3. Add correct label on the issue. If the listing is requesting publish from draft state add the `financial-onboarding-draft` label. If the listing is initiating financial onboarding from unverified state, add the `financial-onboarding-unverified` label \
+  1.4. Save and create the issue 
 If the process fails at any point, we log an error in splunk 
 
-2. Financial Onboarding Job
+**2. Financial Onboarding Job**
 
-Associated inputs: 
-hook, issue_id, listing_type, mailer_params
+Associated inputs:  
+**hook**: Instance of Model Hook : webhook associated with the marketplace listing \
+**issue_id**: int : Id of the issue created in the `github/marketplace` repository \
+**listing_type**: string: Type of listing, either `new_listing` or `unverified_listing` \
+**mailer_params**: object : Object containing listing information including listing_name, listing financial_email and listing technical_email
 
 ![Financial Onboarding Job (1)](https://user-images.githubusercontent.com/44273715/124971857-53503f80-e047-11eb-878a-7a82a0f1a3a4.png)
 
-The financial onboarding job is responsible for 
-a. Performing webhook checks on the listing
-b. Sending email to user if check is successful 
-c. Updating status of listing on the created issue
+  The financial onboarding job is responsible for \
+  a. Performing webhook checks on the listing <br>
+  b. Sending email to user if check is successful <br>
+  c. Updating status of listing on the created issue <br>
 
-* The `send_email_for_financial_onboarding` method uses the `MarketplaceMailer` method `financial_onboarding_update` to send an email with a google form for collecting basic information for onboarding onto payment portal. The email is sent to technical lead and financial lead emails specified by the user in their the app listing
+The email is sent using `send_email_for_financial_onboarding` method. It uses the `MarketplaceMailer` method `financial_onboarding_update` to send an email with a google form for collecting basic information for onboarding onto payment portal. The email is sent to technical lead and financial lead emails specified by the user in their the app listing
 
 ## Testing in dev environment
 To test the changes in dev environment following setup is required:
@@ -67,8 +73,16 @@ To test the changes in dev environment following setup is required:
 2. Create a private repository by the name of `marketplace` under `github` organization
 3. Create two template issues on this repository, one containing template for draft listing applying for financial onboarding (sample) and another for unverified listing applying for financial onboarding (sample) and note their issue numbers
 4. Go to `financial-onboarding-dependency.rb` file in `app/models/marketplace` and replace the issue numbers by your newly created issue numbers for draft and unverified listing respectively
-5. Now that the setup is done, create a new organization, create a new github app, list the app in marketplace and request publish with this app with a paid plan 
+```
+line 61: template_issue = Issue.where("number = 'REPLACE_WITH_DRAFT_ISSUE_NUMBER' AND repository_id = #{repository_id}").first
+line 67: template_issue = Issue.where("number = 'REPLACE_WITH_UNVERIFIED_ISSUE_NUMBER' AND repository_id = #{repository_id}").first
+```
+5. Now that the setup is done, create a new organization, create a new github app, list the app in marketplace and request publish with this app with a paid plan or initiate financial onboarding on an unverified listing
 The marketplace repository should be updated with a newly created issue with your app listing details
+
+## Alternative proposed approach
+An earlier approach was to automate the issue conversation to reduce the manual effort by the marketplace team. This would include tracking the issue for various steps being completed and taking actions accordingly. Complete details present [here](https://docs.google.com/document/d/17H7cC11hBRxagedyR5eAVLRSz-tVa6_DYa-7tsRvskg/edit?usp=sharing)
+The issue automation process provides less visibility for the marketplace team member performing financial onboarding and editing the issue might have unintended consequences that cannot be handled. Discussion documented [here](https://docs.google.com/document/d/1oGPbaZi1F8JSzpMAl7HNndLMt0Vm45twQPBtc1mCAiw/edit?usp=sharing)
 
 ## Future Enhancements
 1. Slack notification on `marketplace-engg` or similar marketplace support channel if issue creation fails
