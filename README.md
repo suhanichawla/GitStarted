@@ -1,4 +1,4 @@
 # GitStarted
 
-master branch has this text on line 3
-should result in a conflict
+This is repository to get started with github
+
