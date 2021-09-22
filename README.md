@@ -1,4 +1,4 @@
 # GitStarted
 
-this is in test branch
-this is dummy text
+This is repository to get started with github
+
